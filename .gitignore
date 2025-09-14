@@ -1,0 +1,27 @@
+# Dependencias
+node_modules/
+
+# Variables de entorno (contienen credenciales)
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Android build (muy pesado)
+frontend-App/android/.gradle/
+frontend-App/android/app/build/
+frontend-App/android/build/
