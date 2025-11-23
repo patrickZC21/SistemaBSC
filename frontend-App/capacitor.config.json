@@ -1,0 +1,31 @@
+{
+  "appId": "com.asistenciasapp.mobile",
+  "appName": "Brayamsac Asistencias",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true,
+    "hostname": "localhost"
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true,
+    "useLegacyBridge": false,
+    "appendUserAgent": "AsistenciasApp/1.0"
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    },
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#ffffff",
+      "showSpinner": true,
+      "spinnerColor": "#0ea5e9"
+    },
+    "App": {
+      "enabled": true
+    }
+  }
+}
