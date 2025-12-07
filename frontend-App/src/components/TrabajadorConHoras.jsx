@@ -137,10 +137,11 @@ const TrabajadorConHoras = ({
           <div className="font-semibold text-[20px] text-[#222] mb-2 self-start">hora de ingreso</div>
           <div className="flex gap-2 justify-center mb-4">
             <input
-              type={editandoHoras[a.trabajador_id] ? 'number' : 'text'}
-              min="0"
-              max="23"
-              value={editandoHoras[a.trabajador_id] ? (horasEdit[a.trabajador_id]?.hIn || h.ingreso.slice(0,2)) : h.ingreso.slice(0,2)}
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={2}
+              value={editandoHoras[a.trabajador_id] ? (horasEdit[a.trabajador_id]?.hIn ?? h.ingreso.slice(0,2)) : h.ingreso.slice(0,2)}
               readOnly={!editandoHoras[a.trabajador_id]}
               onClick={() => {
                 if (!editandoHoras[a.trabajador_id]) {
@@ -156,16 +157,18 @@ const TrabajadorConHoras = ({
                   }));
                 }
               }}
-              onChange={editandoHoras[a.trabajador_id] ? (e => setHorasEdit(prev => ({ ...prev, [a.trabajador_id]: { ...prev[a.trabajador_id], hIn: pad2(clamp(e.target.value,0,23)) } }))): undefined}
+              onChange={editandoHoras[a.trabajador_id] ? (e => { const v = e.target.value.replace(/\D/g,'').slice(0,2); setHorasEdit(prev => ({ ...prev, [a.trabajador_id]: { ...prev[a.trabajador_id], hIn: v } })); }): undefined}
+              onBlur={editandoHoras[a.trabajador_id] ? (() => setHorasEdit(prev => ({ ...prev, [a.trabajador_id]: { ...prev[a.trabajador_id], hIn: pad2(clamp(prev[a.trabajador_id]?.hIn || '0',0,23)) } }))): undefined}
               className={`w-20 h-16 text-[36px] text-center rounded-xl font-medium text-[#3b4252] ${editandoHoras[a.trabajador_id] ? 'border-2 border-[#0a194e] bg-white outline-[#0a194e] cursor-auto' : 'border border-[#ddd] bg-[#f8f8f8] cursor-pointer'}`}
               placeholder="HH"
             />
             <span className="text-[36px] font-medium self-center text-[#3b4252]">:</span>
             <input
-              type={editandoHoras[a.trabajador_id] ? 'number' : 'text'}
-              min="0"
-              max="59"
-              value={editandoHoras[a.trabajador_id] ? (horasEdit[a.trabajador_id]?.mIn || h.ingreso.slice(3,5)) : h.ingreso.slice(3,5)}
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={2}
+              value={editandoHoras[a.trabajador_id] ? (horasEdit[a.trabajador_id]?.mIn ?? h.ingreso.slice(3,5)) : h.ingreso.slice(3,5)}
               readOnly={!editandoHoras[a.trabajador_id]}
               onClick={() => {
                 if (!editandoHoras[a.trabajador_id]) {
@@ -181,7 +184,8 @@ const TrabajadorConHoras = ({
                   }));
                 }
               }}
-              onChange={editandoHoras[a.trabajador_id] ? (e => setHorasEdit(prev => ({ ...prev, [a.trabajador_id]: { ...prev[a.trabajador_id], mIn: pad2(clamp(e.target.value,0,59)) } }))): undefined}
+              onChange={editandoHoras[a.trabajador_id] ? (e => { const v = e.target.value.replace(/\D/g,'').slice(0,2); setHorasEdit(prev => ({ ...prev, [a.trabajador_id]: { ...prev[a.trabajador_id], mIn: v } })); }): undefined}
+              onBlur={editandoHoras[a.trabajador_id] ? (() => setHorasEdit(prev => ({ ...prev, [a.trabajador_id]: { ...prev[a.trabajador_id], mIn: pad2(clamp(prev[a.trabajador_id]?.mIn || '0',0,59)) } }))): undefined}
               className={`w-20 h-16 text-[36px] text-center rounded-xl font-medium text-[#3b4252] ${editandoHoras[a.trabajador_id] ? 'border-2 border-[#0a194e] bg-white outline-[#0a194e] cursor-auto' : 'border border-[#ddd] bg-[#f8f8f8] cursor-pointer'}`}
               placeholder="MM"
             />
@@ -189,10 +193,11 @@ const TrabajadorConHoras = ({
           <div className="font-semibold text-[20px] text-[#222] mb-2 self-start">hora de salida</div>
           <div className="flex gap-2 justify-center mb-5">
             <input
-              type={editandoHoras[a.trabajador_id] ? 'number' : 'text'}
-              min="0"
-              max="23"
-              value={editandoHoras[a.trabajador_id] ? (horasEdit[a.trabajador_id]?.hOut || h.salida.slice(0,2)) : h.salida.slice(0,2)}
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={2}
+              value={editandoHoras[a.trabajador_id] ? (horasEdit[a.trabajador_id]?.hOut ?? h.salida.slice(0,2)) : h.salida.slice(0,2)}
               readOnly={!editandoHoras[a.trabajador_id]}
               onClick={() => {
                 if (!editandoHoras[a.trabajador_id]) {
@@ -208,16 +213,18 @@ const TrabajadorConHoras = ({
                   }));
                 }
               }}
-              onChange={editandoHoras[a.trabajador_id] ? (e => setHorasEdit(prev => ({ ...prev, [a.trabajador_id]: { ...prev[a.trabajador_id], hOut: pad2(clamp(e.target.value,0,23)) } }))): undefined}
+              onChange={editandoHoras[a.trabajador_id] ? (e => { const v = e.target.value.replace(/\D/g,'').slice(0,2); setHorasEdit(prev => ({ ...prev, [a.trabajador_id]: { ...prev[a.trabajador_id], hOut: v } })); }): undefined}
+              onBlur={editandoHoras[a.trabajador_id] ? (() => setHorasEdit(prev => ({ ...prev, [a.trabajador_id]: { ...prev[a.trabajador_id], hOut: pad2(clamp(prev[a.trabajador_id]?.hOut || '0',0,23)) } }))): undefined}
               className={`w-20 h-16 text-[36px] text-center rounded-xl font-medium text-[#3b4252] ${editandoHoras[a.trabajador_id] ? 'border-2 border-[#0a194e] bg-white outline-[#0a194e] cursor-auto' : 'border border-[#ddd] bg-[#f8f8f8] cursor-pointer'}`}
               placeholder="HH"
             />
             <span className="text-[36px] font-medium self-center text-[#3b4252]">:</span>
             <input
-              type={editandoHoras[a.trabajador_id] ? 'number' : 'text'}
-              min="0"
-              max="59"
-              value={editandoHoras[a.trabajador_id] ? (horasEdit[a.trabajador_id]?.mOut || h.salida.slice(3,5)) : h.salida.slice(3,5)}
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={2}
+              value={editandoHoras[a.trabajador_id] ? (horasEdit[a.trabajador_id]?.mOut ?? h.salida.slice(3,5)) : h.salida.slice(3,5)}
               readOnly={!editandoHoras[a.trabajador_id]}
               onClick={() => {
                 if (!editandoHoras[a.trabajador_id]) {
@@ -233,7 +240,8 @@ const TrabajadorConHoras = ({
                   }));
                 }
               }}
-              onChange={editandoHoras[a.trabajador_id] ? (e => setHorasEdit(prev => ({ ...prev, [a.trabajador_id]: { ...prev[a.trabajador_id], mOut: pad2(clamp(e.target.value,0,59)) } }))): undefined}
+              onChange={editandoHoras[a.trabajador_id] ? (e => { const v = e.target.value.replace(/\D/g,'').slice(0,2); setHorasEdit(prev => ({ ...prev, [a.trabajador_id]: { ...prev[a.trabajador_id], mOut: v } })); }): undefined}
+              onBlur={editandoHoras[a.trabajador_id] ? (() => setHorasEdit(prev => ({ ...prev, [a.trabajador_id]: { ...prev[a.trabajador_id], mOut: pad2(clamp(prev[a.trabajador_id]?.mOut || '0',0,59)) } }))): undefined}
               className={`w-20 h-16 text-[36px] text-center rounded-xl font-medium text-[#3b4252] ${editandoHoras[a.trabajador_id] ? 'border-2 border-[#0a194e] bg-white outline-[#0a194e] cursor-auto' : 'border border-[#ddd] bg-[#f8f8f8] cursor-pointer'}`}
               placeholder="MM"
             />

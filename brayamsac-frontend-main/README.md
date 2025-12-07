@@ -1,6 +1,6 @@
 # 🏢 Frontend Web - Sistema de Asistencias Brayam SAC
 
-### Versión Final — Abril 2026
+### Versión Final — Diciembre 2025
 
 Frontend web del sistema de gestión de asistencias para roles de administración: RRHH, administradores y coordinadores. Permite gestionar almacenes, subalmacenes, trabajadores, coordinadores, registrar asistencias y visualizar dashboards analíticos.
 
@@ -108,4 +108,4 @@ npm run build
 **Patrick Zamata**
 
 ---
-**Última actualización:** Abril 2026
+**Última actualización:** Diciembre 2025

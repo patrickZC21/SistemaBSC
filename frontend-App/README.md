@@ -1,6 +1,6 @@
 # 📱 App Móvil Coordinadores - Asistencias Brayam SAC
 
-### Versión Final — Abril 2026
+### Versión Final — Diciembre 2025
 
 Aplicación móvil para coordinadores de campo, optimizada para el registro rápido de asistencias desde dispositivos Android. Construida con React + Vite y empaquetada como APK nativa usando Capacitor.
 
@@ -127,4 +127,4 @@ frontend-App/
 **Patrick Zamata**
 
 ---
-**Última actualización:** Abril 2026
+**Última actualización:** Diciembre 2025

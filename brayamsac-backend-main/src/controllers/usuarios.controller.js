@@ -108,10 +108,13 @@ export const eliminarUsuario = async (req, res) => {
   try {
     // 1. Eliminar usuario_almacenes relacionados
     await pool.query('DELETE FROM usuario_almacenes WHERE usuario_id = ?', [usuarioId]);
-    // 2. Eliminar trabajadores donde sea coordinador
-    await pool.query('DELETE FROM trabajadores WHERE coordinador_id = ?', [usuarioId]);
-    // 3. Eliminar asistencias donde sea responsable (registrado_por)
-    await pool.query('DELETE FROM asistencias WHERE registrado_por = ?', [usuarioId]);
+    
+    // 2. Desasociar trabajadores del coordinador (NO eliminarlos)
+    await pool.query('UPDATE trabajadores SET coordinador_id = NULL WHERE coordinador_id = ?', [usuarioId]);
+    
+    // 3. Desasociar asistencias registradas por este usuario (NO eliminarlas)
+    await pool.query('UPDATE asistencias SET registrado_por = NULL WHERE registrado_por = ?', [usuarioId]);
+    
     // 4. Eliminar usuario
     const affectedRows = await UsuarioService.eliminarUsuario(usuarioId);
     if (affectedRows === 0)
