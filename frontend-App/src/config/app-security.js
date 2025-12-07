@@ -100,7 +100,21 @@ export const tokenManager = {
   
   isValid: () => {
     const token = tokenManager.get();
-    return token !== null && token.length > 0;
+    if (!token || token.length === 0) return false;
+    try {
+      // Decode JWT payload (base64) to check expiration
+      const parts = token.split('.');
+      if (parts.length !== 3) return false;
+      const payload = JSON.parse(atob(parts[1]));
+      if (payload.exp && payload.exp * 1000 < Date.now()) {
+        console.warn('🔐 Token JWT expirado');
+        return false;
+      }
+      return true;
+    } catch (e) {
+      console.error('🔐 Error al decodificar token:', e);
+      return false;
+    }
   },
   
   // Marcar sesión como persistente (no cerrar automáticamente)
@@ -315,6 +329,14 @@ export const apiRequest = async (url, options = {}) => {
       });
       
       if (response.status >= 400) {
+        // Si el token expiró o es inválido en móvil, limpiar y redirigir al login
+        if (response.status === 401) {
+          console.warn('🔐 Token expirado/inválido (móvil) - redirigiendo al login');
+          tokenManager.forceRemove();
+          if (typeof window !== 'undefined') {
+            window.location.href = '/';
+          }
+        }
         const error = new Error(`HTTP ${response.status}: ${response.data || 'Error desconocido'}`);
         error.status = response.status;
         throw error;
@@ -343,6 +365,16 @@ export const apiRequest = async (url, options = {}) => {
         const errorText = await response.text();
         const error = new Error(`HTTP ${response.status}: ${errorText}`);
         error.status = response.status;
+        
+        // Si el token expiró o es inválido, limpiar y redirigir al login
+        if (response.status === 401) {
+          console.warn('🔐 Token expirado/inválido - redirigiendo al login');
+          tokenManager.forceRemove();
+          if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+            window.location.href = '/';
+          }
+        }
+        
         throw error;
       }
       

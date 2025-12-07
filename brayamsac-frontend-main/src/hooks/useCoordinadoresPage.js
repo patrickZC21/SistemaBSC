@@ -150,8 +150,8 @@ export default function useCoordinadoresPage() {
       setUsuarioIdAsignar(null);
       setCoordinadorNombreAsignar('');
       
-      // Solo recargar los datos esenciales (más rápido)
-      await refetchCoordinadores();
+      // Recargar coordinadores Y datos de almacenes (para actualizar la tabla completa)
+      await Promise.all([refetchCoordinadores(), loadData()]);
       
     } catch (err) {
       console.error('❌ Error asignando almacenes:', err);

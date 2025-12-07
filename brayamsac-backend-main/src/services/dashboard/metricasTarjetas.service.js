@@ -8,18 +8,33 @@ import pool from '../../config/db.js';
  */
 export const obtenerMetricasTarjetas = async () => {
   try {
+    // Fecha actual en zona horaria de Perú (UTC-5) para evitar desfase con MySQL UTC
+    const fechaHoy = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Lima',
+      year: 'numeric', month: '2-digit', day: '2-digit'
+    }).format(new Date()); // Formato: YYYY-MM-DD → "2026-04-18"
+
+    // 🔍 DEBUG TEMPORAL - verificar qué fecha usa MySQL vs Node.js
+    const [[mysqlDate]] = await pool.query(`SELECT CURDATE() as mysql_hoy, DATE(CONVERT_TZ(NOW(),'UTC','America/Lima')) as peru_hoy`);
+    console.log(`🕐 DEBUG: Node="${fechaHoy}" | MySQL CURDATE="${mysqlDate.mysql_hoy}" | MySQL Peru="${mysqlDate.peru_hoy}"`);
+    const [asisteHoy] = await pool.query(
+      `SELECT asi.id, asi.trabajador_id, DATE(pf.fecha) as fecha, asi.hora_entrada FROM asistencias asi JOIN programacion_fechas pf ON asi.programacion_fecha_id = pf.id ORDER BY pf.fecha DESC LIMIT 5`,
+    );
+    console.log(`🔍 DEBUG asistencias recientes: ${JSON.stringify(asisteHoy)}`);
+
     // 1. Tasa de Asistencia - % trabajadores con asistencia hoy vs total activos
+
     const [[asistenciaHoy]] = await pool.query(`
       SELECT 
         (SELECT COUNT(DISTINCT asi.trabajador_id) 
          FROM asistencias asi
          JOIN programacion_fechas pf ON asi.programacion_fecha_id = pf.id
-         WHERE pf.fecha = CURDATE()
+         WHERE pf.fecha = ?
            AND asi.hora_entrada IS NOT NULL 
            AND asi.hora_entrada != '00:00:00'
         ) AS trabajadores_presentes,
         (SELECT COUNT(*) FROM trabajadores WHERE activo = 1) AS total_trabajadores
-    `);
+    `, [fechaHoy]);
 
     const presentes = parseInt(asistenciaHoy.trabajadores_presentes) || 0;
     const totalTrab = parseInt(asistenciaHoy.total_trabajadores) || 0;
@@ -35,20 +50,20 @@ export const obtenerMetricasTarjetas = async () => {
       LEFT JOIN asistencias asi ON asi.programacion_fecha_id = pf.id
         AND asi.hora_entrada IS NOT NULL 
         AND asi.hora_entrada != '00:00:00'
-      WHERE pf.fecha BETWEEN CURDATE() - INTERVAL 6 DAY AND CURDATE()
+      WHERE pf.fecha BETWEEN DATE_SUB(?, INTERVAL 6 DAY) AND ?
       GROUP BY pf.fecha
       ORDER BY pf.fecha ASC
-    `);
+    `, [fechaHoy, fechaHoy]);
 
     // Tasa de asistencia de ayer para comparación
     const [[asistenciaAyerRow]] = await pool.query(`
       SELECT COUNT(DISTINCT asi.trabajador_id) AS presentes_ayer
       FROM asistencias asi
       JOIN programacion_fechas pf ON asi.programacion_fecha_id = pf.id
-      WHERE pf.fecha = CURDATE() - INTERVAL 1 DAY
+      WHERE pf.fecha = DATE_SUB(?, INTERVAL 1 DAY)
         AND asi.hora_entrada IS NOT NULL
         AND asi.hora_entrada != '00:00:00'
-    `);
+    `, [fechaHoy]);
     
     const presentesAyer = parseInt(asistenciaAyerRow.presentes_ayer) || 0;
     const tasaAyer = totalTrab > 0 ? (presentesAyer / totalTrab) * 100 : 0;
@@ -63,12 +78,12 @@ export const obtenerMetricasTarjetas = async () => {
         ) AS promedio_horas
       FROM asistencias asi
       JOIN programacion_fechas pf ON asi.programacion_fecha_id = pf.id
-      WHERE pf.fecha BETWEEN CURDATE() - INTERVAL 6 DAY AND CURDATE()
+      WHERE pf.fecha BETWEEN DATE_SUB(?, INTERVAL 6 DAY) AND ?
         AND asi.hora_entrada IS NOT NULL 
         AND asi.hora_salida IS NOT NULL
         AND asi.hora_entrada != '00:00:00'
         AND asi.hora_salida != '00:00:00'
-    `);
+    `, [fechaHoy, fechaHoy]);
 
     const promedioActual = parseFloat(duracion.promedio_horas) || 0;
 
@@ -81,12 +96,12 @@ export const obtenerMetricasTarjetas = async () => {
         ) AS promedio_horas_anterior
       FROM asistencias asi
       JOIN programacion_fechas pf ON asi.programacion_fecha_id = pf.id
-      WHERE pf.fecha BETWEEN CURDATE() - INTERVAL 13 DAY AND CURDATE() - INTERVAL 7 DAY
+      WHERE pf.fecha BETWEEN DATE_SUB(?, INTERVAL 13 DAY) AND DATE_SUB(?, INTERVAL 7 DAY)
         AND asi.hora_entrada IS NOT NULL 
         AND asi.hora_salida IS NOT NULL
         AND asi.hora_entrada != '00:00:00'
         AND asi.hora_salida != '00:00:00'
-    `);
+    `, [fechaHoy, fechaHoy]);
 
     const promedioAnterior = parseFloat(duracionAnterior.promedio_horas_anterior) || 0;
     const cambioDuracion = promedioAnterior > 0
@@ -107,10 +122,10 @@ export const obtenerMetricasTarjetas = async () => {
         AND asi.hora_salida IS NOT NULL
         AND asi.hora_entrada != '00:00:00'
         AND asi.hora_salida != '00:00:00'
-      WHERE pf.fecha BETWEEN CURDATE() - INTERVAL 6 DAY AND CURDATE()
+      WHERE pf.fecha BETWEEN DATE_SUB(?, INTERVAL 6 DAY) AND ?
       GROUP BY pf.fecha
       ORDER BY pf.fecha ASC
-    `);
+    `, [fechaHoy, fechaHoy]);
 
     // 3. Tasa de Cumplimiento - horas trabajadas vs horas objetivo (últimos 7 días)
     const [[cumplimientoRow]] = await pool.query(`
@@ -164,10 +179,10 @@ export const obtenerMetricasTarjetas = async () => {
         AND asi.hora_salida IS NOT NULL
         AND asi.hora_entrada != '00:00:00'
         AND asi.hora_salida != '00:00:00'
-      WHERE pf.fecha BETWEEN CURDATE() - INTERVAL 6 DAY AND CURDATE()
+      WHERE pf.fecha BETWEEN DATE_SUB(?, INTERVAL 6 DAY) AND ?
       GROUP BY pf.fecha
       ORDER BY pf.fecha ASC
-    `);
+    `, [fechaHoy, fechaHoy]);
 
     // Formatear fechas a strings simples YYYY-MM-DD
     const formatFecha = (f) => {

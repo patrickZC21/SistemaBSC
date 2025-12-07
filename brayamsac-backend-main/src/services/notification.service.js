@@ -16,11 +16,13 @@ class NotificationService extends EventEmitter {
     // Configurar conexión SSE
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
+      'Cache-Control': 'no-cache, no-transform',
       'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no',      // ← evita que nginx corte la conexión SSE
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': 'Cache-Control'
     });
+    res.flushHeaders(); // ← envía headers inmediatamente
 
     // Enviar mensaje inicial
     res.write('data: {"type": "connected"}\n\n');
@@ -40,16 +42,18 @@ class NotificationService extends EventEmitter {
     // Configurar conexión SSE
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
+      'Cache-Control': 'no-cache, no-transform',
       'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no',      // ← evita que nginx corte la conexión SSE
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': 'Cache-Control'
     });
+    res.flushHeaders(); // ← envía headers inmediatamente sin esperar el body
 
     // Enviar mensaje inicial con timestamp
     res.write(`data: ${JSON.stringify({ type: 'connected', timestamp: new Date().toISOString() })}\n\n`);
 
-    // Heartbeat cada 30 segundos para mantener la conexión viva
+    // Heartbeat cada 25 segundos para mantener la conexión viva
     const heartbeat = setInterval(() => {
       try {
         res.write(`data: ${JSON.stringify({ type: 'heartbeat', timestamp: new Date().toISOString() })}\n\n`);
@@ -57,7 +61,7 @@ class NotificationService extends EventEmitter {
         clearInterval(heartbeat);
         this.dashboardClients.delete(res);
       }
-    }, 30000);
+    }, 25000);
 
     // Limpiar cliente cuando se desconecta
     res.on('close', () => {
